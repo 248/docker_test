@@ -1,0 +1,55 @@
+mysql:
+  image: mysql
+  environment:
+    MYSQL_ROOT_PASSWORD: 'pass'
+  ports:
+    - '3306:3306'
+  volumes_from:
+    - datastore
+
+redis:
+  image: redis:2.8.19
+  ports:
+    - '6379:6379'
+  volumes_from:
+    - datastore
+
+# nginx:
+#   build: containers/nginx
+#   ports:
+#     - '8080:80'
+#   volumes_from:
+#     - datastore
+#   links:
+#     - rails
+
+datastore:
+  build: containers/datastore
+  volumes:
+    - /vagrant:/vagrant:rw
+
+#strage:
+ # image: busybox:latest
+ # volumes:
+ #   - /vagrant:/vagrant:rw
+
+rails:
+  build: .
+  command: bundle exec rails s -p 3000 -b '0.0.0.0'
+  ports:
+    - '80:80'
+    - '3000:3000'
+  volumes:
+    - .:/myapp
+  environment:
+    RAILS_ENV: development
+    MYSQL_ROOT_PASSWORD: 'pass'
+    DATABASE_URL: mysql2://root:pass@mysql:3306
+    REDIS_URL: redis://redis:6379
+    SECRET_KEY_BASE: hogehoge
+  volumes_from:
+    - datastore
+    # - strage
+  links:
+    - mysql
+    - redis
