@@ -24,10 +24,14 @@ RUN apt-get update && \
 ENV LANG C.UTF-8
 
 RUN mkdir /base01
-WORKDIR /base01
-ADD Gemfile Gemfile.lock /base01/
-RUN bundle install --path vendor/bundle
+
+WORKDIR /tmp
+COPY Gemfile Gemfile
+COPY Gemfile.lock Gemfile.lock
+RUN bundle install
+
 ADD . /base01
+WORKDIR /base01
 
 # git config setting
 RUN git config --global user.name "k-nishiyama"
